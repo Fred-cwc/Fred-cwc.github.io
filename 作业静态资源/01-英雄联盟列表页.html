@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>欢迎来到英雄联盟</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+        
+        #box {
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            min-width: 650px;
+            overflow: hidden;
+        }
+        
+        .content {
+            width: 100%;
+            border: 1px solid #00a383;
+            height: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
+            display: flex;
+        }
+        
+        .nav {
+            height: 40px;
+            padding-left: 15px;
+            line-height: 40px;
+            font-weight: bold;
+            color: #00a383;
+            border-bottom: 3px solid #00a383;
+        }
+        
+        .list {
+            overflow: auto;
+            width: 200px;
+            margin-bottom: 40px;
+        }
+        
+        .item {
+            padding-left: 15px;
+            line-height: 30px;
+            cursor: pointer;
+            transition: all .5s;
+        }
+        
+        .active,
+        .item:hover {
+            color: #fff;
+            background: #00a383 !important;
+        }
+        
+        .item:nth-child(odd) {
+            background: rgba(0, 0, 0, .1);
+        }
+        
+        .info {
+            display: inline-block;
+            flex: 1;
+            height: 100%;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .bg {
+            width: 100%;
+            height: 100%;
+            background-size: cover !important;
+            overflow-y: auto;
+        }
+        
+        .name {
+            text-align: center;
+            line-height: 30px;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        
+        .tags,
+        .story {
+            padding: 30px;
+        }
+        
+        .tags>span {
+            margin-right: 30px;
+        }
+        
+        .img {
+            margin: 15px 0;
+            text-align: center;
+            max-height: 45%;
+            overflow: hidden;
+            /* 伸缩盒子实现图片居中 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .img>img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        h5 {
+            font-size: 18px;
+        }
+        
+        #loading {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(22, 27, 31);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div id="box">
+        <div class="nav">
+            <span>英雄列表</span>
+        </div>
+        <div class="content">
+            <!-- 人物列表 -->
+            <ul class="list">
+
+            </ul>
+            <!-- 人物详情 -->
+            <div class="info">
+                <!-- <div class="bg" style="background:url(http://ossweb-img.qq.com/images/lol/web201310/skin/big517000.jpg) no-repeat">
+                    <div class="name" style="color:red">英雄姓名:塞拉斯</div>
+                    <div class="img">
+                        <img src="https://ossweb-img.qq.com/images/lol/img/champion/Sylas.png" alt="">
+                    </div>
+                    <p style="color:red">英雄外号：解脱者</p>
+                    <div class="tags">
+                        <h5 style="color:red">英雄特征：法师 刺客</h5>
+                    </div>
+                    <div class="story">
+                        <h5>英雄故事：</h5>
+                        <p>作为一个出生于德玛西亚穷苦家庭的法师，虽然当时塞拉斯还只是一个少年，搜魔人还是将他终身监禁。他使用偷来的魔法杀害了场上所有人，除了饱受惊吓的拉克丝。塞拉斯不是以逃犯的身份离开搜魔人监狱，而是成为了法师反抗的代表。</p>
+                    </div>
+                </div> -->
+
+
+
+            </div>
+        </div>
+    </div>
+    <div id="loading">
+        <img src="./loading.gif" alt="">
+    </div>
+    <script src="./libs/jquery-1.12.4.min.js"></script>
+    <script src="./libs/template-web.js"></script>
+    <!-- 写模板 -->
+    <!-- 1：人物姓名模板 -->
+    <script id="hero_list" type="type/html">
+        {{each data v}}
+        <li class="item">{{v.name}}</li>
+        {{/each}}
+    </script>
+    <!-- 2：人物详情模板 -->
+    <script id="hero_lnfo" type="type/html">
+        <div class="info">
+            <div class="bg" style="background:url({{data.img}}) no-repeat">
+                <div class="name" style="color:red">英雄姓名:{{data.name}}</div>
+                <div class="img">
+                    <img src="{{data.iconUrl}}" alt="">
+                </div>
+                <p style="color:red">英雄外号：{{data.title}}</p>
+                <div class="tags">
+                    <h5 style="color:red">英雄特征：{{data.roles.join('')}}</h5>
+                </div>
+                <div class="story">
+                    <h5>英雄故事：</h5>
+                    <p>{{data.story.slice(14)}}</p>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script>
+        //思路分析
+        // 1.页面一加载：发送ajax请求所有英雄数据，显示到左侧列表
+        // 2.点击左侧列表,右侧盒子显示对应英雄数据
+        //ajax发送请求
+        //服务器反应之后，使用系统引擎渲染画面
+        // 查询lol英雄详情
+        // 请求地址：https://autumnfish.cn/api/lol/info
+        // 请求方法：get
+        // 请求参数：id 
+
+        //声明一个全局变量存储服务器返回的英雄信息
+        heroArr = []
+            // 查询lol英雄列表
+            // 请求地址：https://autumnfish.cn/api/lol/search
+            // 请求方法：get
+            // 请求参数：q
+            //ajax发送请求
+        $.ajax({
+            url: 'https://autumnfish.cn/api/lol/search',
+            type: 'get',
+            dataType: 'json',
+            success: function(backData) {
+                console.log(backData)
+                    //服务器响应1s之后加载，使用系统引擎渲染画面
+                setTimeout(function() {
+                    $('#loading').hide()
+                    $('.list').html(template('hero_list', backData))
+                        //把服务器返回的数组存起来用于渲染详细信息
+                    heroArr = backData.data
+                    console.log(heroArr)
+                        //默认触发第一个列表点击事件（默认加载第一个英雄详情）
+                    $('.list>li').eq(0).click()
+                }, 1000)
+            }
+        })
+
+        // 2.点击左侧列表,右侧盒子显示对应英雄数据
+        // 注意点：这个左侧列表的li元素是动态加载的，需要注册委托事件
+        $('.content').on('click', '.list>li', function() {
+            // 查询lol英雄详情
+            // 请求地址：https://autumnfish.cn/api/lol/info
+            // 请求方法：get
+            // 请求参数：id 
+            //获取当前元素的下标
+            let idx = $(this).index()
+                //通过下标获取到对应的数据
+            let obj = heroArr[idx]
+            $.ajax({
+                url: 'https://autumnfish.cn/api/lol/info',
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    id: obj.id
+                },
+                success: function(backData) {
+                    //服务器反应之后，使用系统引擎渲染画面
+                    console.log(backData)
+                        //渲染数据
+                    $('.info').html(template('hero_lnfo', backData))
+                }
+            })
+        })
+    </script>
+
+
+</body>
+
+</html>
